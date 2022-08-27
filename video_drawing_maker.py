@@ -5,6 +5,7 @@ import gradio as gr
 import requests
 from PIL import Image
 import os
+import app
 def video_splitter(path_to_video,saving_folder):
 
     """this function splits a video into frames
@@ -24,23 +25,8 @@ def video_splitter(path_to_video,saving_folder):
 def frame_converter(frame_to_convert,path_with_saved_frames,saving_folder):
         
 
-        data = gr.processing_utils.encode_url_or_file_to_base64(path_with_saved_frames+frame_to_convert)
-
-        r = requests.post(url='https://hf.space/embed/carolineec/informativedrawings/+/api/predict/', json={"data": [data,"style 1"]})
-        my_json = r.json().get('data')[0]
-        img = gr.processing_utils.decode_base64_to_file(my_json, encryption_key=None, file_path=None)
-
-        import tempfile, shutil
-        
-        f = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
-        
-        f.write('foo')
-        
-        file_name = img.name
-        
-        f.close()
-        
-        shutil.copy(file_name, saving_folder+"/"+frame_to_convert)
+    img = app.predict(path_with_saved_frames+frame_to_convert,"style 2")
+    img.save(saving_folder+frame_to_convert)
 
 def video_maker(path_of_frames,name_of_video):
 
@@ -86,11 +72,11 @@ def main(path_to_original_video=None,
         name_of_video='test_drawed.mp4'
    
     
-    #video_splitter(path_to_original_video,path_to_save_frames)
+    video_splitter(path_to_original_video,path_to_save_frames)
 
 
-    #for file in os.listdir(path_to_save_frames):
-    #    frame_converter(file,path_to_save_frames,path_to_save_drawed_frames)
+    for file in os.listdir(path_to_save_frames):
+        frame_converter(file,path_to_save_frames,path_to_save_drawed_frames)
     
     video_maker(path_to_save_drawed_frames,name_of_video)
 
